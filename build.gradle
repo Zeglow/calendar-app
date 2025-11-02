@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '6.0.26'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+spotbugs {
+    toolVersion = '4.8.6'  // SpotBugs 版本
+    effort = 'max'          // 分析力度：min, default, max
+    reportLevel = 'low'     // 报告级别：low, medium, high
+    ignoreFailures = true   // 发现问题时是否继续构建
+}
+
+// 配置 SpotBugs 任务
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'  // 使用更好看的样式
+        }
+        xml {
+            required = false
+        }
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.4'
+    // 使用 Google 的 Java 代码风格
+    config = resources.text.fromUri("https://raw.githubusercontent.com/checkstyle/checkstyle/checkstyle-${toolVersion}/src/main/resources/google_checks.xml")
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.author = true
+    options.version = true
+    options.links = [
+            'https://docs.oracle.com/en/java/javase/21/docs/api/'
+    ]
+
+    // 如果有 Javadoc 警告，不让构建失败
+    failOnError = false
+
+    // 配置 Javadoc 的标题和底部信息
+    options.windowTitle = 'Calendar App API Documentation'
+    options.docTitle = 'Calendar App API'
+    options.bottom = 'Copyright &copy; 2025 Calendar App. All Rights Reserved.'
+}
+
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
