@@ -238,7 +238,7 @@ public class Calendar {
   }
 
   /**
-   * Updates an existing event with new information.
+   * Updates an existing event with new information. Preserves the event ID.
    *
    * @param oldEvent the event to update
    * @param newEvent the new event data
@@ -246,26 +246,44 @@ public class Calendar {
    *                                  newEvent would cause conflict
    */
   public void updateEvent(Event oldEvent, Event newEvent) {
+    // Check if old event exists
     if (!events.contains(oldEvent)) {
       throw new IllegalArgumentException("Event to update does not exist");
     }
 
+    // Create updated event with preserved ID
+    Event updatedEvent = oldEvent.withUpdatedFields(
+        newEvent.getSubject(),
+        newEvent.getStartDate(),
+        newEvent.getEndDate(),
+        newEvent.getStartTime(),
+        newEvent.getEndTime(),
+        newEvent.getVisibility(),
+        newEvent.getDescription(),
+        newEvent.getLocation()
+    );
+
+    // Temporarily remove old event
     events.remove(oldEvent);
 
     try {
-      if (events.contains(newEvent)) {
+      // Check for duplicate (excluding the event being updated)
+      if (events.contains(updatedEvent)) {
         throw new IllegalArgumentException(
             "Updated event would create duplicate");
       }
 
-      if (!allowConflicts && hasConflict(newEvent)) {
+      // Check for conflict (if enabled)
+      if (!allowConflicts && hasConflict(updatedEvent)) {
         throw new IllegalArgumentException(
             "Updated event would cause conflict");
       }
 
-      events.add(newEvent);
+      // Add updated event
+      events.add(updatedEvent);
 
     } catch (Exception e) {
+      // Rollback on failure
       events.add(oldEvent);
       throw e;
     }
@@ -296,8 +314,123 @@ public class Calendar {
     }
 
     // Only when all validations pass, add all instances
-    for (Event instance : instances) {
-      events.add(instance);
+    events.addAll(instances);
+  }
+
+  /**
+   * Finds an event by its unique ID.
+   *
+   * @param id the event ID
+   * @return the event, or null if not found
+   */
+  public Event findEventById(String id) {
+    for (Event event : events) {
+      if (event.getId().equals(id)) {
+        return event;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Finds all events belonging to a recurring series.
+   *
+   * @param seriesId the series ID
+   * @return list of events in the series
+   */
+  public List<Event> findEventsBySeriesId(String seriesId) {
+    List<Event> result = new ArrayList<>();
+    for (Event event : events) {
+      if (seriesId.equals(event.getSeriesId())) {
+        result.add(event);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Updates a single instance of a recurring event.
+   *
+   * @param instanceId the ID of the instance to update
+   * @param newEvent   the new event data
+   * @throws IllegalArgumentException if instance not found or update would cause issues
+   */
+  public void updateRecurringInstance(String instanceId, Event newEvent) {
+    Event oldEvent = findEventById(instanceId);
+    if (oldEvent == null) {
+      throw new IllegalArgumentException("Event instance not found");
+    }
+
+    if (oldEvent.getSeriesId() == null) {
+      throw new IllegalArgumentException("Event is not part of a recurring series");
+    }
+
+    updateEvent(oldEvent, newEvent);
+  }
+
+  /**
+   * Updates all instances of a recurring series starting from a specific date.
+   */
+  public void updateRecurringSeriesFromDate(String seriesId, LocalDate fromDate, Event template) {
+    List<Event> seriesEvents = findEventsBySeriesId(seriesId);
+
+    if (seriesEvents.isEmpty()) {
+      throw new IllegalArgumentException("Recurring series not found");
+    }
+
+    // Find instances from the specified date onwards
+    List<Event> toUpdate = new ArrayList<>();
+    for (Event event : seriesEvents) {
+      if (!event.getStartDate().isBefore(fromDate)) {
+        toUpdate.add(event);
+      }
+    }
+
+    if (toUpdate.isEmpty()) {
+      throw new IllegalArgumentException("No instances found from the specified date");
+    }
+
+    // Update each instance while preserving its date and ID
+    for (Event oldEvent : toUpdate) {
+      Event newEvent = oldEvent.withUpdatedFields(
+          template.getSubject(),
+          oldEvent.getStartDate(),  // Preserve original date
+          oldEvent.getEndDate(),
+          template.getStartTime(),
+          template.getEndTime(),
+          template.getVisibility(),
+          template.getDescription(),
+          template.getLocation()
+      );
+
+      updateEvent(oldEvent, newEvent);
+    }
+  }
+
+  /**
+   * Updates all instances of an entire recurring series.
+   */
+  public void updateEntireRecurringSeries(String seriesId, Event template) {
+    List<Event> seriesEvents = findEventsBySeriesId(seriesId);
+
+    if (seriesEvents.isEmpty()) {
+      throw new IllegalArgumentException("Recurring series not found");
+    }
+
+    // Update all instances while preserving their dates and IDs
+    for (Event oldEvent : seriesEvents) {
+      Event newEvent = oldEvent.withUpdatedFields(
+          template.getSubject(),
+          oldEvent.getStartDate(),  // Preserve original date
+          oldEvent.getEndDate(),
+          template.getStartTime(),
+          template.getEndTime(),
+          template.getVisibility(),
+          template.getDescription(),
+          template.getLocation()
+      );
+
+      updateEvent(oldEvent, newEvent);
     }
   }
 }

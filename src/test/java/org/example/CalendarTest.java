@@ -536,4 +536,193 @@ public class CalendarTest {
     calendar.addRecurringEvent(recurring);
     assertEquals(4, calendar.getEvents().size());
   }
+
+  @Test
+  void testFindEventById() {
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event event = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    calendar.addEvent(event);
+
+    Event found = calendar.findEventById(event.getId());
+
+    assertNotNull(found);
+    assertEquals(event.getId(), found.getId());
+    assertEquals("Meeting", found.getSubject());
+  }
+
+  @Test
+  void testFindEventByIdNotFound() {
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event found = calendar.findEventById("non-existent-id");
+
+    assertNull(found);
+  }
+
+  @Test
+  void testFindEventsBySeriesId() {
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+
+    List<Event> seriesEvents = calendar.findEventsBySeriesId(recurring.getSeriesId());
+
+    assertEquals(3, seriesEvents.size());
+
+    // All should have the same series ID
+    for (Event e : seriesEvents) {
+      assertEquals(recurring.getSeriesId(), e.getSeriesId());
+    }
+  }
+
+  @Test
+  void testUpdateSingleRecurringInstance() {
+    // Edit only one instance of a recurring event
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+
+    // Get the second instance (11/8)
+    List<Event> instances = calendar.findEventsBySeriesId(recurring.getSeriesId());
+    Event secondInstance = instances.get(1);
+
+    // Update only this instance
+    Event updated = new Event("Weekly Meeting - UPDATED",
+        LocalDate.of(2024, 11, 8),
+        LocalDate.of(2024, 11, 8),
+        LocalTime.of(10, 0),  // Different time
+        LocalTime.of(11, 0),
+        "public",
+        "This instance is special",
+        "Different Room");
+
+    calendar.updateRecurringInstance(secondInstance.getId(), updated);
+
+    // Should still have 3 events
+    assertEquals(3, calendar.getEvents().size());
+
+    // Second instance should be updated
+    Event updatedInstance = calendar.findEventById(secondInstance.getId());
+    assertEquals("Weekly Meeting - UPDATED", updatedInstance.getSubject());
+    assertEquals(LocalTime.of(10, 0), updatedInstance.getStartTime());
+
+    // Other instances should be unchanged
+    Event firstInstance = instances.get(0);
+    Event foundFirst = calendar.findEventById(firstInstance.getId());
+    assertEquals("Weekly Meeting", foundFirst.getSubject());
+    assertEquals(LocalTime.of(9, 0), foundFirst.getStartTime());
+  }
+
+  @Test
+  void testUpdateRecurringSeriesFromDate() {
+    // Edit all instances from a specific date onwards
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 4);  // 4 instances
+
+    calendar.addRecurringEvent(recurring);
+
+    // Update from 11/8 onwards
+    Event updatedTemplate = new Event("Weekly Meeting - New Time",
+        LocalDate.of(2024, 11, 8),
+        LocalDate.of(2024, 11, 8),
+        LocalTime.of(14, 0),  // Different time
+        LocalTime.of(15, 0));
+
+    calendar.updateRecurringSeriesFromDate(
+        recurring.getSeriesId(),
+        LocalDate.of(2024, 11, 8),
+        updatedTemplate);
+
+    // Should still have 4 events
+    assertEquals(4, calendar.getEvents().size());
+
+    // First instance (11/1) should be unchanged
+    List<Event> nov1 = calendar.findEventsByDate(LocalDate.of(2024, 11, 1));
+    assertEquals("Weekly Meeting", nov1.get(0).getSubject());
+    assertEquals(LocalTime.of(9, 0), nov1.get(0).getStartTime());
+
+    // Later instances (11/8, 11/15, 11/22) should be updated
+    List<Event> nov8 = calendar.findEventsByDate(LocalDate.of(2024, 11, 8));
+    assertEquals("Weekly Meeting - New Time", nov8.get(0).getSubject());
+    assertEquals(LocalTime.of(14, 0), nov8.get(0).getStartTime());
+
+    List<Event> nov15 = calendar.findEventsByDate(LocalDate.of(2024, 11, 15));
+    assertEquals("Weekly Meeting - New Time", nov15.get(0).getSubject());
+  }
+
+  @Test
+  void testUpdateEntireRecurringSeries() {
+    // Edit all instances of a recurring event
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+
+    // Update entire series
+    Event updatedTemplate = new Event("Weekly Sync",  // New subject
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(14, 0),  // New time
+        LocalTime.of(15, 0),
+        "private",
+        "Updated description",
+        "New Room");
+
+    calendar.updateEntireRecurringSeries(recurring.getSeriesId(), updatedTemplate);
+
+    // Should still have 3 events
+    assertEquals(3, calendar.getEvents().size());
+
+    // All instances should be updated
+    List<Event> allInstances = calendar.findEventsBySeriesId(recurring.getSeriesId());
+    for (Event instance : allInstances) {
+      assertEquals("Weekly Sync", instance.getSubject());
+      assertEquals(LocalTime.of(14, 0), instance.getStartTime());
+      assertEquals("private", instance.getVisibility());
+      assertEquals("New Room", instance.getLocation());
+    }
+
+    // Dates should be preserved
+    assertEquals(LocalDate.of(2024, 11, 1), allInstances.get(0).getStartDate());
+    assertEquals(LocalDate.of(2024, 11, 8), allInstances.get(1).getStartDate());
+    assertEquals(LocalDate.of(2024, 11, 15), allInstances.get(2).getStartDate());
+  }
 }

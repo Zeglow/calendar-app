@@ -116,6 +116,77 @@ public class Event {
   }
 
   /**
+   * Creates a new event with specified ID (for internal use, e.g., updates).
+   *
+   * @param id          the event ID to use
+   * @param subject     the event subject
+   * @param startDate   the start date
+   * @param endDate     the end date
+   * @param startTime   the start time (null for all-day event)
+   * @param endTime     the end time (null for all-day event)
+   * @param visibility  the visibility ("public" or "private")
+   * @param description the event description
+   * @param location    the event location
+   * @param seriesId    the series ID for recurring events (null for regular events)
+   */
+  private Event(String id, String subject, LocalDate startDate, LocalDate endDate,
+      LocalTime startTime, LocalTime endTime,
+      String visibility, String description, String location,
+      String seriesId) {
+    if (endDate.isBefore(startDate)) {
+      throw new IllegalArgumentException(
+          "End date cannot be before start date");
+    }
+
+    if (startTime == null && endTime != null) {
+      throw new IllegalArgumentException(
+          "End time requires start time");
+    }
+
+    if (startTime != null && endTime == null) {
+      throw new IllegalArgumentException(
+          "Start time requires end time");
+    }
+
+    if (startTime != null && endTime != null && startDate.equals(endDate) && endTime.isBefore(
+        startTime)) {
+      throw new IllegalArgumentException(
+          "End time cannot be before start time on the same day");
+    }
+
+    this.id = id;  // Use provided ID instead of generating new one
+    this.seriesId = seriesId;
+    this.subject = subject;
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.visibility = visibility;
+    this.description = description;
+    this.location = location;
+  }
+
+  /**
+   * Creates a copy of this event with updated fields, preserving the ID.
+   *
+   * @param subject     the new subject
+   * @param startDate   the new start date
+   * @param endDate     the new end date
+   * @param startTime   the new start time
+   * @param endTime     the new end time
+   * @param visibility  the new visibility
+   * @param description the new description
+   * @param location    the new location
+   * @return a new Event with the same ID but updated fields
+   */
+  public Event withUpdatedFields(String subject, LocalDate startDate, LocalDate endDate,
+      LocalTime startTime, LocalTime endTime,
+      String visibility, String description, String location) {
+    return new Event(this.id, subject, startDate, endDate, startTime, endTime,
+        visibility, description, location, this.seriesId);
+  }
+
+  /**
    * Gets the unique event ID.
    *
    * @return the event ID
