@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class EventTest {
 
@@ -77,13 +78,12 @@ public class EventTest {
 
   @Test
   void testEndTimeCannotBeBeforeStartTime() {
-    // 同一天的事件，结束时间不能早于开始时间
     assertThrows(IllegalArgumentException.class, () -> {
       new Event("Meeting",
           LocalDate.of(2024, 11, 1),
           LocalDate.of(2024, 11, 1),
-          LocalTime.of(10, 0),  // 开始时间
-          LocalTime.of(9, 0));  // 结束时间更早！
+          LocalTime.of(10, 0),
+          LocalTime.of(9, 0));
     });
   }
 
@@ -109,5 +109,142 @@ public class EventTest {
 
     assertEquals(LocalTime.of(9, 0), event.getStartTime());
     assertEquals(LocalTime.of(9, 0), event.getEndTime());
+  }
+
+  @Test
+  void testCreateEventWithAllFields() {
+    Event event = new Event("Team Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0),
+        "public",              // visibility
+        "Discuss Q4 goals",    // description
+        "Conference Room A");  // location
+
+    assertEquals("Team Meeting", event.getSubject());
+    assertEquals("public", event.getVisibility());
+    assertEquals("Discuss Q4 goals", event.getDescription());
+    assertEquals("Conference Room A", event.getLocation());
+  }
+
+  @Test
+  void testCreateEventWithOptionalFieldsNull() {
+    Event event = new Event("Birthday",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        null,
+        null,
+        null,  // visibility
+        null,  // description
+        null); // location
+
+    assertTrue(event.isAllDay());
+    assertNull(event.getVisibility());
+    assertNull(event.getDescription());
+    assertNull(event.getLocation());
+  }
+
+  @Test
+  void testVisibilityCanBePublicOrPrivate() {
+    Event publicEvent = new Event("Public Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        null, null,
+        "public", null, null);
+
+    Event privateEvent = new Event("Private Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        null, null,
+        "private", null, null);
+
+    assertEquals("public", publicEvent.getVisibility());
+    assertEquals("private", privateEvent.getVisibility());
+  }
+
+  @Test
+  void testEqualEventsWithSameKey() {
+    // 相同的 subject + startDate + startTime = 相等
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    Event event2 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(11, 0)); // 不同的结束时间
+
+    assertEquals(event1, event2); // 应该相等，因为key相同
+    assertEquals(event1.hashCode(), event2.hashCode());
+  }
+
+  @Test
+  void testDifferentEventsWithDifferentSubject() {
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    Event event2 = new Event("Lunch",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    assertNotEquals(event1, event2);
+  }
+
+  @Test
+  void testDifferentEventsWithDifferentDate() {
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    Event event2 = new Event("Meeting",
+        LocalDate.of(2024, 11, 2),
+        LocalDate.of(2024, 11, 2));
+
+    assertNotEquals(event1, event2);
+  }
+
+  @Test
+  void testDifferentEventsWithDifferentTime() {
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    Event event2 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(14, 0),
+        LocalTime.of(15, 0));
+
+    assertNotEquals(event1, event2);
+  }
+
+  @Test
+  void testAllDayEventsEquality() {
+    Event event1 = new Event("Birthday",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    Event event2 = new Event("Birthday",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    assertEquals(event1, event2);
+  }
+
+  @Test
+  void testToStringContainsSubject() {
+    Event event = new Event("Team Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    String str = event.toString();
+    assertTrue(str.contains("Team Meeting"));
   }
 }

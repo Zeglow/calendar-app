@@ -2,6 +2,7 @@ package org.example;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 /**
  * Represents a calendar event.
@@ -13,16 +14,19 @@ public class Event {
   private final LocalDate endDate;
   private final LocalTime startTime;
   private final LocalTime endTime;
+  private final String visibility;    // 新增
+  private final String description;   // 新增
+  private final String location;      // 新增
 
   /**
-   * Creates a new all-day event.
+   * Creates a new all-day event with minimal fields.
    *
    * @param subject   the event subject
    * @param startDate the start date
    * @param endDate   the end date
    */
   public Event(String subject, LocalDate startDate, LocalDate endDate) {
-    this(subject, startDate, endDate, null, null);
+    this(subject, startDate, endDate, null, null, null, null, null);
   }
 
   /**
@@ -36,6 +40,24 @@ public class Event {
    */
   public Event(String subject, LocalDate startDate, LocalDate endDate,
       LocalTime startTime, LocalTime endTime) {
+    this(subject, startDate, endDate, startTime, endTime, null, null, null);
+  }
+
+  /**
+   * Creates a new event with all fields.
+   *
+   * @param subject     the event subject
+   * @param startDate   the start date
+   * @param endDate     the end date
+   * @param startTime   the start time (null for all-day event)
+   * @param endTime     the end time (null for all-day event)
+   * @param visibility  the visibility ("public" or "private")
+   * @param description the event description
+   * @param location    the event location
+   */
+  public Event(String subject, LocalDate startDate, LocalDate endDate,
+      LocalTime startTime, LocalTime endTime,
+      String visibility, String description, String location) {
     if (endDate.isBefore(startDate)) {
       throw new IllegalArgumentException(
           "End date cannot be before start date");
@@ -51,8 +73,8 @@ public class Event {
           "Start time requires end time");
     }
 
-    if (startTime != null && endTime != null &&
-        startDate.equals(endDate) && endTime.isBefore(startTime)) {
+    if (startTime != null && endTime != null && startDate.equals(endDate) && endTime.isBefore(
+        startTime)) {
       throw new IllegalArgumentException(
           "End time cannot be before start time on the same day");
     }
@@ -62,6 +84,9 @@ public class Event {
     this.endDate = endDate;
     this.startTime = startTime;
     this.endTime = endTime;
+    this.visibility = visibility;
+    this.description = description;
+    this.location = location;
   }
 
   /**
@@ -110,6 +135,33 @@ public class Event {
   }
 
   /**
+   * Gets the visibility.
+   *
+   * @return the visibility ("public" or "private"), or null if not set
+   */
+  public String getVisibility() {
+    return visibility;
+  }
+
+  /**
+   * Gets the description.
+   *
+   * @return the description, or null if not set
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * Gets the location.
+   *
+   * @return the location, or null if not set
+   */
+  public String getLocation() {
+    return location;
+  }
+
+  /**
    * Checks if this is an all-day event.
    *
    * @return true if the event has no specific times
@@ -117,4 +169,31 @@ public class Event {
   public boolean isAllDay() {
     return startTime == null && endTime == null;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof Event)) {
+      return false;
+    }
+    Event other = (Event) obj;
+    return subject.equals(other.subject)
+        && startDate.equals(other.startDate)
+        && Objects.equals(startTime, other.startTime);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(subject, startDate, startTime);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Event[%s, %s %s-%s]", subject, startDate,
+        startTime != null ? startTime : "all-day",
+        endTime != null ? endTime : "");
+  }
+
 }
