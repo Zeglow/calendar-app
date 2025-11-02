@@ -1,5 +1,6 @@
 package org.example;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -437,5 +438,102 @@ public class CalendarTest {
     assertThrows(IllegalArgumentException.class, () -> {
       calendar.updateEvent(event2, updatedEvent2);
     });
+  }
+
+  @Test
+  void testAddRecurringEvent() {
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+
+    assertEquals(3, calendar.getEvents().size());
+  }
+
+  @Test
+  void testAddRecurringEventWithConflict() {
+    Calendar calendar = new Calendar("My Calendar", false);
+
+    Event existing = new Event("Existing Meeting",
+        LocalDate.of(2024, 11, 8),
+        LocalDate.of(2024, 11, 8),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+    calendar.addEvent(existing);
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      calendar.addRecurringEvent(recurring);
+    });
+
+    assertEquals(1, calendar.getEvents().size());
+    assertEquals("Existing Meeting", calendar.getEvents().get(0).getSubject());
+  }
+
+  @Test
+  void testAddRecurringEventWithDuplicate() {
+    Calendar calendar = new Calendar("My Calendar");
+
+    Event duplicate = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 8),
+        LocalDate.of(2024, 11, 8),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+    calendar.addEvent(duplicate);
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      calendar.addRecurringEvent(recurring);
+    });
+
+    assertEquals(1, calendar.getEvents().size());
+  }
+
+  @Test
+  void testAddRecurringEventAllowsConflictsWhenEnabled() {
+    Calendar calendar = new Calendar("My Calendar", true);  // Allow conflicts
+
+    Event existing = new Event("Existing Meeting",
+        LocalDate.of(2024, 11, 8),
+        LocalDate.of(2024, 11, 8),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+    calendar.addEvent(existing);
+
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+    assertEquals(4, calendar.getEvents().size());
   }
 }

@@ -13,8 +13,8 @@ public class RecurringEvent {
 
   private final Event baseEvent;
   private final DayOfWeek dayOfWeek;
-  private final Integer count;  // 重复次数（可选）
-  private final LocalDate endDate;  // 结束日期（可选）
+  private final Integer count;
+  private final LocalDate endDate;
 
   /**
    * Creates a recurring event with a specific count.
@@ -48,13 +48,11 @@ public class RecurringEvent {
    */
   private RecurringEvent(Event baseEvent, DayOfWeek dayOfWeek,
       Integer count, LocalDate endDate) {
-    // 验证：事件不能跨天
     if (!baseEvent.getStartDate().equals(baseEvent.getEndDate())) {
       throw new IllegalArgumentException(
           "Recurring event cannot span multiple days");
     }
 
-    // 验证：必须指定count或endDate之一
     if (count == null && endDate == null) {
       throw new IllegalArgumentException(
           "Must specify either count or end date");
@@ -79,13 +77,11 @@ public class RecurringEvent {
   public List<Event> generateInstances() {
     List<Event> instances = new ArrayList<>();
 
-    // 找到第一个匹配dayOfWeek的日期
     LocalDate currentDate = baseEvent.getStartDate();
     if (currentDate.getDayOfWeek() != dayOfWeek) {
       currentDate = currentDate.with(TemporalAdjusters.next(dayOfWeek));
     }
 
-    // 生成实例
     int generated = 0;
     while (shouldGenerateMore(currentDate, generated)) {
       Event instance = createInstance(currentDate);

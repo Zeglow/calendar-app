@@ -246,34 +246,58 @@ public class Calendar {
    *                                  newEvent would cause conflict
    */
   public void updateEvent(Event oldEvent, Event newEvent) {
-    // 检查旧事件是否存在
     if (!events.contains(oldEvent)) {
       throw new IllegalArgumentException("Event to update does not exist");
     }
 
-    // 暂时移除旧事件以便检查
     events.remove(oldEvent);
 
     try {
-      // 检查新事件是否会造成重复（除非和旧事件相同）
       if (events.contains(newEvent)) {
         throw new IllegalArgumentException(
             "Updated event would create duplicate");
       }
 
-      // 检查冲突（如果启用）
       if (!allowConflicts && hasConflict(newEvent)) {
         throw new IllegalArgumentException(
             "Updated event would cause conflict");
       }
 
-      // 添加新事件
       events.add(newEvent);
 
     } catch (Exception e) {
-      // 如果更新失败，恢复旧事件
       events.add(oldEvent);
       throw e;
+    }
+  }
+
+  /**
+   * Adds a recurring event to the calendar. All instances must be valid, or the entire operation
+   * fails (atomic).
+   *
+   * @param recurring the recurring event
+   * @throws IllegalArgumentException if any instance would create duplicate or conflict
+   */
+  public void addRecurringEvent(RecurringEvent recurring) {
+    List<Event> instances = recurring.generateInstances();
+
+    for (Event instance : instances) {
+      // Check duplicate
+      if (events.contains(instance)) {
+        throw new IllegalArgumentException(
+            "Recurring event would create duplicate at " + instance.getStartDate());
+      }
+
+      // Check conflict
+      if (!allowConflicts && hasConflict(instance)) {
+        throw new IllegalArgumentException(
+            "Recurring event would cause conflict at " + instance.getStartDate());
+      }
+    }
+
+    // Only when all validations pass, add all instances
+    for (Event instance : instances) {
+      events.add(instance);
     }
   }
 }
