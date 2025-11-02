@@ -1,7 +1,9 @@
 package org.example;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class Main {
 
@@ -33,5 +35,32 @@ public class Main {
     } catch (IllegalArgumentException e) {
       System.out.println("\nCaught expected error: " + e.getMessage());
     }
+
+    Event baseEvent = new Event("Weekly Team Meeting",
+        LocalDate.of(2024, 11, 1),  // 2024-11-1 是周五
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0),
+        "public",
+        "Discuss weekly progress",
+        "Conference Room A");
+
+    System.out.println("Base Event: " + baseEvent);
+    System.out.println();
+    
+    System.out.println("Creating recurring event: Every Friday, 3 times");
+    RecurringEvent recurring = new RecurringEvent(baseEvent, DayOfWeek.FRIDAY, 3);
+
+    List<Event> instances = recurring.generateInstances();
+    System.out.println("Generated " + instances.size() + " instances:");
+    for (int i = 0; i < instances.size(); i++) {
+      Event e = instances.get(i);
+      System.out.println(
+          "  " + (i + 1) + ". " + e.getStartDate() + " " + e.getStartTime() + "-" + e.getEndTime()
+              + " (" + e.getStartDate().getDayOfWeek() + ")");
+    }
+    System.out.println();
   }
+
+
 }

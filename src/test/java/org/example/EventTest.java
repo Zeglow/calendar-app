@@ -165,7 +165,7 @@ public class EventTest {
 
   @Test
   void testEqualEventsWithSameKey() {
-    // 相同的 subject + startDate + startTime = 相等
+    // subject + startDate + startTime -> same
     Event event1 = new Event("Meeting",
         LocalDate.of(2024, 11, 1),
         LocalDate.of(2024, 11, 1),
@@ -176,9 +176,9 @@ public class EventTest {
         LocalDate.of(2024, 11, 1),
         LocalDate.of(2024, 11, 1),
         LocalTime.of(9, 0),
-        LocalTime.of(11, 0)); // 不同的结束时间
+        LocalTime.of(11, 0));
 
-    assertEquals(event1, event2); // 应该相等，因为key相同
+    assertEquals(event1, event2);
     assertEquals(event1.hashCode(), event2.hashCode());
   }
 

@@ -236,4 +236,44 @@ public class Calendar {
 
     return !dateTime.isBefore(eventStart) && dateTime.isBefore(eventEnd);
   }
+
+  /**
+   * Updates an existing event with new information.
+   *
+   * @param oldEvent the event to update
+   * @param newEvent the new event data
+   * @throws IllegalArgumentException if oldEvent doesn't exist, newEvent would create duplicate, or
+   *                                  newEvent would cause conflict
+   */
+  public void updateEvent(Event oldEvent, Event newEvent) {
+    // 检查旧事件是否存在
+    if (!events.contains(oldEvent)) {
+      throw new IllegalArgumentException("Event to update does not exist");
+    }
+
+    // 暂时移除旧事件以便检查
+    events.remove(oldEvent);
+
+    try {
+      // 检查新事件是否会造成重复（除非和旧事件相同）
+      if (events.contains(newEvent)) {
+        throw new IllegalArgumentException(
+            "Updated event would create duplicate");
+      }
+
+      // 检查冲突（如果启用）
+      if (!allowConflicts && hasConflict(newEvent)) {
+        throw new IllegalArgumentException(
+            "Updated event would cause conflict");
+      }
+
+      // 添加新事件
+      events.add(newEvent);
+
+    } catch (Exception e) {
+      // 如果更新失败，恢复旧事件
+      events.add(oldEvent);
+      throw e;
+    }
+  }
 }
