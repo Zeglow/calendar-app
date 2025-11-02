@@ -142,4 +142,98 @@ public class Calendar {
     // start1 < end2 AND start2 < end1
     return start1.isBefore(end2) && start2.isBefore(end1);
   }
+
+  /**
+   * Finds all events with the given subject.
+   *
+   * @param subject the subject to search for
+   * @return list of matching events
+   */
+  public List<Event> findEventsBySubject(String subject) {
+    List<Event> result = new ArrayList<>();
+    for (Event event : events) {
+      if (event.getSubject().equals(subject)) {
+        result.add(event);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Finds all events on the given date.
+   *
+   * @param date the date to search for
+   * @return list of events on that date
+   */
+  public List<Event> findEventsByDate(LocalDate date) {
+    List<Event> result = new ArrayList<>();
+    for (Event event : events) {
+      if (!date.isBefore(event.getStartDate())
+          &&
+          !date.isAfter(event.getEndDate())) {
+        result.add(event);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Finds all events within the given date range.
+   *
+   * @param startDate the start of the range
+   * @param endDate   the end of the range
+   * @return list of events in the range
+   */
+  public List<Event> findEventsInRange(LocalDate startDate, LocalDate endDate) {
+    List<Event> result = new ArrayList<>();
+    for (Event event : events) {
+      // event and range overlaps
+      if (!event.getEndDate().isBefore(startDate)
+          &&
+          !event.getStartDate().isAfter(endDate)) {
+        result.add(event);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Checks if the calendar is busy at the given date and time.
+   *
+   * @param dateTime the date and time to check
+   * @return true if there is an event at that time
+   */
+  public boolean isBusy(LocalDateTime dateTime) {
+    for (Event event : events) {
+      if (isEventActiveAt(event, dateTime)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if an event is active at the given date and time.
+   *
+   * @param event    the event to check
+   * @param dateTime the date and time
+   * @return true if the event is active at that time
+   */
+  private boolean isEventActiveAt(Event event, LocalDateTime dateTime) {
+    LocalDate date = dateTime.toLocalDate();
+
+    // check date range
+    if (date.isBefore(event.getStartDate()) || date.isAfter(event.getEndDate())) {
+      return false;
+    }
+
+    if (event.isAllDay()) {
+      return true;
+    }
+
+    LocalDateTime eventStart = LocalDateTime.of(event.getStartDate(), event.getStartTime());
+    LocalDateTime eventEnd = LocalDateTime.of(event.getEndDate(), event.getEndTime());
+
+    return !dateTime.isBefore(eventStart) && dateTime.isBefore(eventEnd);
+  }
 }
