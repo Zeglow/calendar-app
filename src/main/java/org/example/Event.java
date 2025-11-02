@@ -3,20 +3,23 @@ package org.example;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents a calendar event.
  */
 public class Event {
 
+  private final String id;            // Unique identifier
+  private final String seriesId;      // Series ID for recurring events (null for regular events)
   private final String subject;
   private final LocalDate startDate;
   private final LocalDate endDate;
   private final LocalTime startTime;
   private final LocalTime endTime;
-  private final String visibility;    // 新增
-  private final String description;   // 新增
-  private final String location;      // 新增
+  private final String visibility;
+  private final String description;
+  private final String location;
 
   /**
    * Creates a new all-day event with minimal fields.
@@ -26,7 +29,7 @@ public class Event {
    * @param endDate   the end date
    */
   public Event(String subject, LocalDate startDate, LocalDate endDate) {
-    this(subject, startDate, endDate, null, null, null, null, null);
+    this(subject, startDate, endDate, null, null, null, null, null, null);
   }
 
   /**
@@ -40,11 +43,11 @@ public class Event {
    */
   public Event(String subject, LocalDate startDate, LocalDate endDate,
       LocalTime startTime, LocalTime endTime) {
-    this(subject, startDate, endDate, startTime, endTime, null, null, null);
+    this(subject, startDate, endDate, startTime, endTime, null, null, null, null);
   }
 
   /**
-   * Creates a new event with all fields.
+   * Creates a new event with all fields except series ID.
    *
    * @param subject     the event subject
    * @param startDate   the start date
@@ -58,6 +61,27 @@ public class Event {
   public Event(String subject, LocalDate startDate, LocalDate endDate,
       LocalTime startTime, LocalTime endTime,
       String visibility, String description, String location) {
+    this(subject, startDate, endDate, startTime, endTime,
+        visibility, description, location, null);
+  }
+
+  /**
+   * Creates a new event with all fields including series ID.
+   *
+   * @param subject     the event subject
+   * @param startDate   the start date
+   * @param endDate     the end date
+   * @param startTime   the start time (null for all-day event)
+   * @param endTime     the end time (null for all-day event)
+   * @param visibility  the visibility ("public" or "private")
+   * @param description the event description
+   * @param location    the event location
+   * @param seriesId    the series ID for recurring events (null for regular events)
+   */
+  public Event(String subject, LocalDate startDate, LocalDate endDate,
+      LocalTime startTime, LocalTime endTime,
+      String visibility, String description, String location,
+      String seriesId) {
     if (endDate.isBefore(startDate)) {
       throw new IllegalArgumentException(
           "End date cannot be before start date");
@@ -79,6 +103,8 @@ public class Event {
           "End time cannot be before start time on the same day");
     }
 
+    this.id = UUID.randomUUID().toString();
+    this.seriesId = seriesId;
     this.subject = subject;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -87,6 +113,24 @@ public class Event {
     this.visibility = visibility;
     this.description = description;
     this.location = location;
+  }
+
+  /**
+   * Gets the unique event ID.
+   *
+   * @return the event ID
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * Gets the series ID (for recurring events).
+   *
+   * @return the series ID, or null for regular events
+   */
+  public String getSeriesId() {
+    return seriesId;
   }
 
   /**
@@ -195,5 +239,5 @@ public class Event {
         startTime != null ? startTime : "all-day",
         endTime != null ? endTime : "");
   }
-
 }
+

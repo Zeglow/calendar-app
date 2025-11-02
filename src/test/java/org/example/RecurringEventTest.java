@@ -77,4 +77,58 @@ public class RecurringEventTest {
       new RecurringEvent(spanningEvent, DayOfWeek.FRIDAY, 3);
     });
   }
+
+  @Test
+  void testEventHasUniqueId() {
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    Event event2 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    // Each event should have a unique ID
+    assertNotNull(event1.getId());
+    assertNotNull(event2.getId());
+    assertNotEquals(event1.getId(), event2.getId());
+  }
+
+  @Test
+  void testEventSeriesId() {
+    // Regular event has no series ID
+    Event regularEvent = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    assertNull(regularEvent.getSeriesId());
+
+    // Event with series ID
+    Event seriesEvent = new Event("Meeting", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 1),
+        null, null, null, null, null,
+        "series-123");  // series ID
+
+    assertEquals("series-123", seriesEvent.getSeriesId());
+  }
+
+  @Test
+  void testEqualsDoesNotIncludeId() {
+    // Two events with same key but different IDs should still be equal
+    // (for duplicate detection based on subject+date+time)
+    Event event1 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    Event event2 = new Event("Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    // Different IDs but should be equal
+    assertNotEquals(event1.getId(), event2.getId());
+    assertEquals(event1, event2);
+  }
 }
