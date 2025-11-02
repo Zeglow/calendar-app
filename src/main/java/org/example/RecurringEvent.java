@@ -5,12 +5,14 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a recurring event that repeats weekly.
  */
 public class RecurringEvent {
 
+  private final String seriesId;      // Unique identifier for this series
   private final Event baseEvent;
   private final DayOfWeek dayOfWeek;
   private final Integer count;
@@ -63,6 +65,7 @@ public class RecurringEvent {
           "Count must be positive");
     }
 
+    this.seriesId = UUID.randomUUID().toString();
     this.baseEvent = baseEvent;
     this.dayOfWeek = dayOfWeek;
     this.count = count;
@@ -70,13 +73,21 @@ public class RecurringEvent {
   }
 
   /**
-   * Generates all instances of the recurring event.
+   * Gets the series ID.
+   *
+   * @return the unique series ID
+   */
+  public String getSeriesId() {
+    return seriesId;
+  }
+
+  /**
+   * Generates all instances of the recurring event. All instances will share the same series ID.
    *
    * @return list of event instances
    */
   public List<Event> generateInstances() {
     List<Event> instances = new ArrayList<>();
-
     LocalDate currentDate = baseEvent.getStartDate();
     if (currentDate.getDayOfWeek() != dayOfWeek) {
       currentDate = currentDate.with(TemporalAdjusters.next(dayOfWeek));
@@ -110,7 +121,7 @@ public class RecurringEvent {
   }
 
   /**
-   * Creates an event instance for the given date.
+   * Creates an event instance for the given date. The instance will have the series ID.
    *
    * @param date the date for the instance
    * @return the event instance
@@ -124,7 +135,8 @@ public class RecurringEvent {
         baseEvent.getEndTime(),
         baseEvent.getVisibility(),
         baseEvent.getDescription(),
-        baseEvent.getLocation()
+        baseEvent.getLocation(),
+        seriesId  // Set series ID for all instances
     );
   }
 

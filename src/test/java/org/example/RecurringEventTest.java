@@ -131,4 +131,56 @@ public class RecurringEventTest {
     assertNotEquals(event1.getId(), event2.getId());
     assertEquals(event1, event2);
   }
+
+  @Test
+  void testRecurringInstancesHaveSameSeriesId() {
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    List<Event> instances = recurring.generateInstances();
+
+    String seriesId = instances.get(0).getSeriesId();
+    assertNotNull(seriesId);
+
+    for (Event instance : instances) {
+      assertEquals(seriesId, instance.getSeriesId());
+    }
+  }
+
+  @Test
+  void testRecurringInstancesHaveUniqueIds() {
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1),
+        LocalTime.of(9, 0),
+        LocalTime.of(10, 0));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+
+    List<Event> instances = recurring.generateInstances();
+
+    assertEquals(3, instances.size());
+    assertNotEquals(instances.get(0).getId(), instances.get(1).getId());
+    assertNotEquals(instances.get(1).getId(), instances.get(2).getId());
+    assertNotEquals(instances.get(0).getId(), instances.get(2).getId());
+  }
+
+  @Test
+  void testGetSeriesId() {
+    Event baseEvent = new Event("Weekly Meeting",
+        LocalDate.of(2024, 11, 1),
+        LocalDate.of(2024, 11, 1));
+
+    RecurringEvent recurring = new RecurringEvent(baseEvent,
+        DayOfWeek.FRIDAY, 3);
+    
+    assertNotNull(recurring.getSeriesId());
+  }
 }
