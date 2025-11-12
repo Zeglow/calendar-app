@@ -370,6 +370,11 @@ public class Calendar {
 
   /**
    * Updates all instances of a recurring series starting from a specific date.
+   *
+   * @param seriesId the series ID
+   * @param fromDate the date to start updating from (inclusive)
+   * @param template the template with new values
+   * @throws IllegalArgumentException if series not found or update would cause issues
    */
   public void updateRecurringSeriesFromDate(String seriesId, LocalDate fromDate, Event template) {
     List<Event> seriesEvents = findEventsBySeriesId(seriesId);
@@ -409,6 +414,10 @@ public class Calendar {
 
   /**
    * Updates all instances of an entire recurring series.
+   *
+   * @param seriesId the series ID
+   * @param template the template with new values
+   * @throws IllegalArgumentException if series not found or update would cause issues
    */
   public void updateEntireRecurringSeries(String seriesId, Event template) {
     List<Event> seriesEvents = findEventsBySeriesId(seriesId);
