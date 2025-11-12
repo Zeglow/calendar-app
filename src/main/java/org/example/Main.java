@@ -5,8 +5,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Main class for demonstrating calendar functionality.
+ */
 public class Main {
 
+  /**
+   * Demonstrates the calendar application features.
+   *
+   * @param args command line arguments (not used)
+   */
   public static void main(String[] args) {
     Event allDayEvent = new Event("Birthday",
         LocalDate.of(2024, 11, 1),
@@ -37,7 +45,7 @@ public class Main {
     }
 
     Event baseEvent = new Event("Weekly Team Meeting",
-        LocalDate.of(2024, 11, 1),  // 2024-11-1 是周五
+        LocalDate.of(2024, 11, 1),
         LocalDate.of(2024, 11, 1),
         LocalTime.of(9, 0),
         LocalTime.of(10, 0),
@@ -47,7 +55,7 @@ public class Main {
 
     System.out.println("Base Event: " + baseEvent);
     System.out.println();
-    
+
     System.out.println("Creating recurring event: Every Friday, 3 times");
     RecurringEvent recurring = new RecurringEvent(baseEvent, DayOfWeek.FRIDAY, 3);
 
@@ -61,6 +69,4 @@ public class Main {
     }
     System.out.println();
   }
-
-
 }
