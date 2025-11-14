@@ -62,7 +62,6 @@ public class Calendar {
    * @throws IllegalArgumentException if duplicate event exists or conflict detected
    */
   public void addEvent(Event event) {
-    // 检查重复
     if (events.contains(event)) {
       throw new IllegalArgumentException(
           "Event with same subject, date, and time already exists");
@@ -74,6 +73,8 @@ public class Calendar {
     }
 
     events.add(event);
+
+    announceEventAdded(event);
   }
 
   /**
@@ -284,11 +285,14 @@ public class Calendar {
       // Add updated event
       events.add(updatedEvent);
 
+
     } catch (Exception e) {
       // Rollback on failure
       events.add(oldEvent);
       throw e;
     }
+
+    announceEventModified(updatedEvent);
   }
 
   /**
@@ -317,6 +321,10 @@ public class Calendar {
 
     // Only when all validations pass, add all instances
     events.addAll(instances);
+
+    for (Event instance : instances) {
+      announceEventAdded(instance);
+    }
   }
 
   /**
