@@ -198,12 +198,10 @@ public class CalendarStorage {
       LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime,
       String visibility, String description, String location) {
     try {
-      // Access the private constructor using reflection
-      java.lang.reflect.Constructor<Event> constructor = Event.class.getDeclaredConstructor(
+      var constructor = Event.class.getDeclaredConstructor(
           String.class, String.class, LocalDate.class, LocalDate.class,
           LocalTime.class, LocalTime.class, String.class, String.class,
-          String.class, String.class
-      );
+          String.class, String.class);
       constructor.setAccessible(true);
       return constructor.newInstance(id, subject, startDate, endDate,
           startTime, endTime, visibility, description, location, seriesId);
@@ -219,16 +217,7 @@ public class CalendarStorage {
    * @param event    the event to add
    */
   private void addEventDirectly(Calendar calendar, Event event) {
-    try {
-      // Access the private events list using reflection
-      java.lang.reflect.Field eventsField = Calendar.class.getDeclaredField("events");
-      eventsField.setAccessible(true);
-      @SuppressWarnings("unchecked")
-      List<Event> events = (List<Event>) eventsField.get(calendar);
-      events.add(event);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to add event directly", e);
-    }
+    calendar.addEventDirect(event);
   }
 
   /**

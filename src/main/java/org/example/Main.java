@@ -1,72 +1,74 @@
 package org.example;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Main class for demonstrating calendar functionality.
- */
 public class Main {
 
-  /**
-   * Demonstrates the calendar application features.
-   *
-   * @param args command line arguments (not used)
-   */
-  public static void main(String[] args) {
-    Event allDayEvent = new Event("Birthday",
-        LocalDate.of(2024, 11, 1),
-        LocalDate.of(2024, 11, 1));
+  public static void main(String[] args) throws Exception {
 
-    System.out.println("Event: " + allDayEvent.getSubject());
-    System.out.println("Is all day: " + allDayEvent.isAllDay());
+    // Test 1: Storage - Save and Restore
+    System.out.println("=== Test 1: Storage ===");
 
-    Event timedEvent = new Event("Meeting",
-        LocalDate.of(2024, 11, 1),
-        LocalDate.of(2024, 11, 1),
-        LocalTime.of(9, 0),
+    Calendar work = new Calendar("Work");
+    work.addEvent(new Event("Meeting",
+        LocalDate.of(2024, 11, 15),
+        LocalDate.of(2024, 11, 15),
         LocalTime.of(10, 0),
-        "public",
-        "Team sync",
-        "Room 101");
+        LocalTime.of(11, 0)));
 
-    System.out.println("\nEvent: " + timedEvent.getSubject());
-    System.out.println("Time: " + timedEvent.getStartTime() + " - " + timedEvent.getEndTime());
-    System.out.println("Location: " + timedEvent.getLocation());
+    work.addEvent(new Event("Deadline",
+        LocalDate.of(2024, 12, 1),
+        LocalDate.of(2024, 12, 1)));
 
-    try {
-      Event invalid = new Event("Bad Event",
-          LocalDate.of(2024, 11, 2),
-          LocalDate.of(2024, 11, 1));
-    } catch (IllegalArgumentException e) {
-      System.out.println("\nCaught expected error: " + e.getMessage());
+    System.out.println("Created calendar: " + work.getTitle());
+    System.out.println("Events: " + work.getEvents().size());
+
+    List<Calendar> cals = new ArrayList<>();
+    cals.add(work);
+
+    // Save
+    CalendarStorage storage = new CalendarStorage("my_calendars.dat");
+    storage.saveAllCalendars(cals);
+    System.out.println("Saved to file");
+
+    // Restore
+    List<Calendar> restored = storage.restoreAllCalendars();
+    System.out.println("Restored " + restored.size() + " calendar(s)");
+    System.out.println("Events in restored calendar: " + restored.get(0).getEvents().size());
+
+    for (Event e : restored.get(0).getEvents()) {
+      System.out.println("  - " + e.getSubject());
     }
 
-    Event baseEvent = new Event("Weekly Team Meeting",
-        LocalDate.of(2024, 11, 1),
-        LocalDate.of(2024, 11, 1),
-        LocalTime.of(9, 0),
-        LocalTime.of(10, 0),
-        "public",
-        "Discuss weekly progress",
-        "Conference Room A");
+    // Test 2: Importer
+    System.out.println("\n=== Test 2: Import CSV ===");
 
-    System.out.println("Base Event: " + baseEvent);
-    System.out.println();
+    Calendar imported = new Calendar("Imported");
 
-    System.out.println("Creating recurring event: Every Friday, 3 times");
-    RecurringEvent recurring = new RecurringEvent(baseEvent, DayOfWeek.FRIDAY, 3);
+    String csv = """
+        Subject,Start Date,Start Time,End Date,End Time,All Day Event,Description,Location,Private
+        Birthday,11/20/2024,,11/20/2024,,True,Party,Home,False
+        Lunch,11/21/2024,12:00 PM,11/21/2024,01:00 PM,False,,Cafe,False
+        """;
 
-    List<Event> instances = recurring.generateInstances();
-    System.out.println("Generated " + instances.size() + " instances:");
-    for (int i = 0; i < instances.size(); i++) {
-      Event e = instances.get(i);
-      System.out.println(
-          "  " + (i + 1) + ". " + e.getStartDate() + " " + e.getStartTime() + "-" + e.getEndTime()
-              + " (" + e.getStartDate().getDayOfWeek() + ")");
+    CalendarImporter importer = new CalendarImporter();
+    importer.importFromGoogleCalendarCsv(imported, csv);
+
+    System.out.println("Imported " + imported.getEvents().size() + " events:");
+    for (Event e : imported.getEvents()) {
+      System.out.println("  - " + e.getSubject() + " on " + e.getStartDate());
     }
-    System.out.println();
+
+    // Test 3: Export
+    System.out.println("\n=== Test 3: Export CSV ===");
+
+    CalendarExporter exporter = new CalendarExporter();
+    String exported = exporter.exportToGoogleCalendarCsv(work);
+    System.out.println(exported);
+
+    System.out.println("\n=== All working! ===");
   }
 }
