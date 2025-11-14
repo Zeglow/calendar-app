@@ -442,4 +442,8 @@ public class Calendar {
       updateEvent(oldEvent, newEvent);
     }
   }
+  
+  void addEventDirect(Event event) {
+    events.add(event);
+  }
 }
