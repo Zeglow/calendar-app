@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class CalendarListenerTest {
 
@@ -15,6 +14,14 @@ public class CalendarListenerTest {
     int modifyCount = 0;
     Event lastAdded = null;
     Event lastModified = null;
+
+    // AI code review suggested
+//    void reset() {
+//      addCount = 0;
+//      modifyCount = 0;
+//      lastAdded = null;
+//      lastModified = null;
+//    }
 
     @Override
     public void onEventAdded(Event event) {
@@ -101,4 +108,34 @@ public class CalendarListenerTest {
     assertEquals(0, listener.addCount);
   }
 
+  // Added after AI code review
+  @Test
+  public void testUnregisteredListenerNotCalled() {
+    Calendar calendar = new Calendar("Test");
+    TestListener listener = new TestListener();
+
+    calendar.addEvent(new Event("Meeting",
+        LocalDate.of(2025, 11, 15),
+        LocalDate.of(2025, 11, 15)));
+
+    assertEquals(0, listener.addCount);
+  }
+
+  // Added after AI code review
+  @Test
+  public void testRecurringEventNotifiesForEachInstance() {
+    Calendar calendar = new Calendar("Test");
+    TestListener listener = new TestListener();
+    calendar.addCalendarListener(listener);
+
+    Event base = new Event("Weekly Meeting",
+        LocalDate.of(2025, 11, 15),
+        LocalDate.of(2025, 11, 15));
+    RecurringEvent recurring = new RecurringEvent(base,
+        java.time.DayOfWeek.FRIDAY, 3);
+
+    calendar.addRecurringEvent(recurring);
+
+    assertEquals(3, listener.addCount);
+  }
 }
