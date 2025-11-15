@@ -8,12 +8,6 @@ public class Controller {
 
   public static void main(String[] args) {
 
-    Calendar calendar = new Calendar("Test");
-
-    calendar.addEvent(new Event("Meeting",
-        LocalDate.now(), LocalDate.now(),
-        LocalTime.of(10, 0), LocalTime.of(11, 0)));
-
     // restore calendar
     CalendarStorage storage = new CalendarStorage("calendars.dat");
     List<Calendar> calendars;
@@ -41,5 +35,20 @@ public class Controller {
 
     new CreateEventView(cal).setVisible(true);
     new EventDetailView(cal, cal.getEvents().get(0)).setVisible(true);
+
+    // Save when exit
+    final Calendar finalCal = cal;
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      try {
+        storage.saveAllCalendars(List.of(finalCal));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }));
+
+    System.out.println("Events in calendar: " + cal.getEvents().size());
+    for (Event e : cal.getEvents()) {
+      System.out.println("  - " + e.getSubject());
+    }
   }
 }
