@@ -1,9 +1,15 @@
 package org.example;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 public class EventDetailView extends JFrame {
 
@@ -118,6 +124,11 @@ public class EventDetailView extends JFrame {
           location.isEmpty() ? null : location
       );
       calendar.updateEvent(event, newEvent);
+
+      try {
+        new CalendarStorage("calendars.dat").saveAllCalendars(List.of(calendar));
+      } catch (Exception saveEx) {
+      }
 
       JOptionPane.showMessageDialog(this, "Event updated successfully!");
       dispose();

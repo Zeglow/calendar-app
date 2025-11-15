@@ -3,6 +3,7 @@ package org.example;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import javax.swing.*;
 
 public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
@@ -99,6 +100,11 @@ public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
           location.isEmpty() ? null : location);
 
       calendar.addEvent(event);
+
+      try {
+        new CalendarStorage("calendars.dat").saveAllCalendars(List.of(calendar));
+      } catch (Exception saveEx) {
+      }
 
       JOptionPane.showMessageDialog(this, "Event created successfully!");
       dispose();
