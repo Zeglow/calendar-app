@@ -14,7 +14,9 @@ public class Controller {
 
     try {
       calendars = storage.restoreAllCalendars();
+      System.out.println("Restored " + calendars.size() + " calendar(s)");
     } catch (Exception e) {
+      System.out.println("No saved calendars");
       calendars = List.of();
     }
 
@@ -22,8 +24,10 @@ public class Controller {
     Calendar cal;
     if (calendars.isEmpty()) {
       cal = new Calendar("My Calendar");
+      System.out.println("Created new calendar");
     } else {
       cal = calendars.get(0);
+      System.out.println("Selected: " + cal.getTitle());
     }
 
     // Make sure there is an event
@@ -31,6 +35,12 @@ public class Controller {
       cal.addEvent(new Event("Meeting",
           LocalDate.now(), LocalDate.now(),
           LocalTime.of(10, 0), LocalTime.of(11, 0)));
+      System.out.println("Added sample event");
+    }
+
+    System.out.println("\nEvents in calendar: " + cal.getEvents().size());
+    for (Event e : cal.getEvents()) {
+      System.out.println("  - " + e.getSubject());
     }
 
     new CreateEventView(cal).setVisible(true);
@@ -41,14 +51,10 @@ public class Controller {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try {
         storage.saveAllCalendars(List.of(finalCal));
+        System.out.println("Calendar saved!");
       } catch (Exception e) {
         e.printStackTrace();
       }
     }));
-
-    System.out.println("Events in calendar: " + cal.getEvents().size());
-    for (Event e : cal.getEvents()) {
-      System.out.println("  - " + e.getSubject());
-    }
   }
 }
