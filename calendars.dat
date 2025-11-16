@@ -1,0 +1,14 @@
+CALENDARS_V1
+CALENDAR:My Calendar
+EVENT:ca3c39f5-b7da-45d1-9a1f-f772017b08d1||s1|2025-01-02|2025-01-02|||public||
+EVENT:1a18d954-e9d3-4715-b6e3-62909c75ec14||s1-1|2025-11-02|2025-11-03|||public||
+EVENT:e21ff1b6-181a-4157-8f09-ec8dcb5eba88||Create1|2025-11-01|2025-11-01|||public||
+EVENT:cf4c40ae-af22-4b8e-9983-b4cdc22d55d0||test03|2025-01-01|2025-01-01|||public||
+EVENT:0aad020c-f078-4879-9160-00cdfaadb7e1||Add Event|2025-01-01|2025-01-02|||public||
+EVENT:43ee1405-b642-47d4-becb-3407a762cca4||Team Meeting Changed|2025-01-02|2025-01-02|||public||
+EVENT:cd0575f2-0a6e-4d4a-843a-185f9f0c8f66||daily standup changed|2025-11-14|2025-11-14|10:00|11:00|public||
+EVENT:5561bfc0-9dd3-4e88-aa89-c3ecde278ed7||New_save_test|2025-01-01|2025-01-06|||public||
+EVENT:8e7dc4d2-3c2c-4856-9548-eef7d22052f3||save-test|2025-01-01|2025-01-02|||public||
+EVENT:7299797a-73a4-43d1-b121-a3c657f67801||test_create_save|2025-01-01|2025-01-02|||public||
+EVENT:f1f01ca1-3561-46b3-8e9d-275c901662d4||save_test02|2025-12-01|2025-12-01|||public||
+END_CALENDAR

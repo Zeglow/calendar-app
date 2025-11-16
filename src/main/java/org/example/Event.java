@@ -129,7 +129,7 @@ public class Event {
    * @param location    the event location
    * @param seriesId    the series ID for recurring events (null for regular events)
    */
-  private Event(String id, String subject, LocalDate startDate, LocalDate endDate,
+  Event(String id, String subject, LocalDate startDate, LocalDate endDate,
       LocalTime startTime, LocalTime endTime,
       String visibility, String description, String location,
       String seriesId) {

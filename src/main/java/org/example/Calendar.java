@@ -13,6 +13,7 @@ public class Calendar {
   private final String title;
   private final List<Event> events;
   private final boolean allowConflicts;
+  private final List<CalendarListener> listeners;
 
   /**
    * Creates a new calendar with a title. By default, allows time conflicts.
@@ -33,6 +34,7 @@ public class Calendar {
     this.title = title;
     this.events = new ArrayList<>();
     this.allowConflicts = allowConflicts;
+    this.listeners = new ArrayList<>();
   }
 
   /**
@@ -60,7 +62,6 @@ public class Calendar {
    * @throws IllegalArgumentException if duplicate event exists or conflict detected
    */
   public void addEvent(Event event) {
-    // 检查重复
     if (events.contains(event)) {
       throw new IllegalArgumentException(
           "Event with same subject, date, and time already exists");
@@ -72,6 +73,8 @@ public class Calendar {
     }
 
     events.add(event);
+
+    announceEventAdded(event);
   }
 
   /**
@@ -282,11 +285,14 @@ public class Calendar {
       // Add updated event
       events.add(updatedEvent);
 
+
     } catch (Exception e) {
       // Rollback on failure
       events.add(oldEvent);
       throw e;
     }
+
+    announceEventModified(updatedEvent);
   }
 
   /**
@@ -315,6 +321,10 @@ public class Calendar {
 
     // Only when all validations pass, add all instances
     events.addAll(instances);
+
+    for (Event instance : instances) {
+      announceEventAdded(instance);
+    }
   }
 
   /**
@@ -440,6 +450,50 @@ public class Calendar {
       );
 
       updateEvent(oldEvent, newEvent);
+    }
+  }
+
+  void addEventDirect(Event event) {
+    events.add(event);
+  }
+
+  /**
+   * Adds a listener to this calendar.
+   *
+   * @param listener the listener to add
+   */
+  public void addCalendarListener(CalendarListener listener) {
+    listeners.add(listener);
+  }
+
+  /**
+   * Removes a listener from this calendar.
+   *
+   * @param listener the listener to remove
+   */
+  public void removeCalendarListener(CalendarListener listener) {
+    listeners.remove(listener);
+  }
+
+  /**
+   * Notifies all listeners that an event was added.
+   *
+   * @param event the event that was added
+   */
+  private void announceEventAdded(Event event) {
+    for (CalendarListener listener : listeners) {
+      listener.onEventAdded(event);
+    }
+  }
+
+  /**
+   * Notifies all listeners that an event was modified.
+   *
+   * @param event the event that was modified
+   */
+  private void announceEventModified(Event event) {
+    for (CalendarListener listener : listeners) {
+      listener.onEventModified(event);
     }
   }
 }
