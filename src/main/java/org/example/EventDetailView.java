@@ -11,6 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+/**
+ * EventDetailView class provides a GUI for viewing and editing existing calendar events.
+ */
 public class EventDetailView extends JFrame {
 
   private Calendar calendar;
@@ -25,15 +28,21 @@ public class EventDetailView extends JFrame {
   private JTextField locationField;
   private JComboBox<String> visibilityBox;
 
+  /**
+   * Constructs an EventDetailView with the specified calendar and event.
+   *
+   * @param calendar the calendar containing the event
+   * @param event    the event to display and edit
+   */
   public EventDetailView(Calendar calendar, Event event) {
     this.calendar = calendar;
     this.event = event;
-    setupUI();
+    setupUserIterface();
     loadEventData();
   }
 
   // AI Generated
-  private void setupUI() {
+  private void setupUserIterface() {
     setTitle("Event Details");
     setSize(400, 500);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -128,6 +137,7 @@ public class EventDetailView extends JFrame {
       try {
         new CalendarStorage("calendars.dat").saveAllCalendars(List.of(calendar));
       } catch (Exception saveEx) {
+        // ignore save errors
       }
 
       JOptionPane.showMessageDialog(this, "Event updated successfully!");

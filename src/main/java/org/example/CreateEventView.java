@@ -4,9 +4,17 @@ import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
-public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
+/**
+ * CreateEventView class provides a GUI for creating new calendar events.
+ */
+public class CreateEventView extends JFrame {
 
   private Calendar calendar;
 
@@ -19,13 +27,20 @@ public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
   private JTextField locationField;
   private JComboBox<String> visibilityBox;
 
+  /**
+   * Constructs a CreateEventView with the specified calendar.
+   *
+   * @param calendar the calendar to add events to
+   */
   public CreateEventView(Calendar calendar) {
     this.calendar = calendar;
-    setupUI();
+    setupUserInterface();
   }
 
-  // AI generated UI
-  private void setupUI() {
+  /**
+   * Sets up the user interface components. AI generated UI.
+   */
+  private void setupUserInterface() {
     setTitle("Create New Event");
     setSize(400, 500);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -72,7 +87,9 @@ public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
     add(cancelButton);
   }
 
-  // Get data from view and create event
+  /**
+   * Gets data from view and creates a new event.
+   */
   private void createEvent() {
     try {
       String subject = subjectField.getText().trim();
@@ -104,6 +121,7 @@ public class CreateEventView extends JFrame {  // ← 加上 extends JFrame
       try {
         new CalendarStorage("calendars.dat").saveAllCalendars(List.of(calendar));
       } catch (Exception saveEx) {
+        // Ignore save errors during event creation （not sure about this）
       }
 
       JOptionPane.showMessageDialog(this, "Event created successfully!");

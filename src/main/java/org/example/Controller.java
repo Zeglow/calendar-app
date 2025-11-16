@@ -4,8 +4,26 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Controller class that serves as the main entry point for the calendar application. This class
+ * handles calendar restoration, initialization, and persistence operations.
+ */
 public class Controller {
 
+  /**
+   * Main method that initializes and runs the calendar application.
+   *
+   * <p>This method performs the following operations:
+   * <ul>
+   *   <li>Restores calendars from persistent storage</li>
+   *   <li>Creates a new calendar if none exist</li>
+   *   <li>Adds a sample event if the calendar is empty</li>
+   *   <li>Displays the CreateEventView and EventDetailView windows</li>
+   *   <li>Registers a shutdown hook to save the calendar on application exit</li>
+   * </ul>
+   *
+   * @param args command line arguments (not used)
+   */
   public static void main(String[] args) {
 
     // restore calendar

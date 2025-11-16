@@ -5,8 +5,25 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main class that demonstrates and tests the calendar application functionality. This class
+ * contains test cases for storage, import, and export operations.
+ */
 public class Main {
 
+  /**
+   * Main method that runs test cases for the calendar application.
+   *
+   * <p>This method performs the following tests:
+   * <ul>
+   *   <li>Test 1: Storage - Creates a calendar, saves it to file, and restores it</li>
+   *   <li>Test 2: Import CSV - Imports events from a CSV string</li>
+   *   <li>Test 3: Export CSV - Exports calendar events to CSV format</li>
+   * </ul>
+   *
+   * @param args command line arguments (not used)
+   * @throws Exception if any error occurs during testing
+   */
   public static void main(String[] args) throws Exception {
 
     // Test 1: Storage - Save and Restore
